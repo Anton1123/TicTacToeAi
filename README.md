@@ -11,25 +11,35 @@ Git-Hub link: https://github.com/Anton1123/TicTacToeAi
 Results:  
 
 -------------
--Minimax-----
+Minimax
 -------------
 
 Computer goes first:
+
 Move 1 - states explored 549,945
+
 Move 3 - states explored 7,583 
+
 Move 5 - states explored 173
+
 Move 7 - states explored 9
+
 It beat me... =[
 
 Computer goes second:
+
 Move 2 - states explored 55,504
+
 Move 4 - states explored 932
+
 Move 6 - states explored 50
+
 Move 8 - states explored 4
+
 we tied...
 
 ---------------
--AlphaBeta
+AlphaBeta
 ---------------
 
 Computer goes first:
