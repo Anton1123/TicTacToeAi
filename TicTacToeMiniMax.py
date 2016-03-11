@@ -25,13 +25,13 @@ class Board(object):
 
     states_explored = 0
 
+    #prints the board
     def _print(self):
         for element in [self.grid[x:x + 3] for x in xrange(0, 9, 3)]:
             print element
         print
 
     # checks if the current tic tac toe board is complete
-    # if complete updates winner
     def _complete(self):
         if None not in self.grid:
             return True
@@ -40,15 +40,16 @@ class Board(object):
         else:
             return False
 
-    # returns the a list of indexes of all available spots on the baord
+    # returns the a list of indexes of all available spots on the board
+    # used for exploring available states in _miniMax()
     def _openSlots(self):
         return [i for i, j in enumerate(self.grid) if j is None]
 
-    # gets all the positions of a certain player (needed when checking winner)
+    # gets all the positions of a certain player (needed for checking winner)
     def _getPositions(self, Player):
         return [i for i, j in enumerate(self.grid) if j == Player]
 
-    # updates and returns the winner, if no winner, then returns None
+    # checks and returns the winner, if no winner, then returns None
     def _winner(self):
         for player in ('X', 'O'):
             positions = self._getPositions(player)
@@ -61,13 +62,13 @@ class Board(object):
                     return player
         return None
 
-    # take turn for a certain player
+    # take turn for a certain player. E.g. Places an 'X' or an 'O' in the appropriate position
     def _takeTurn(self, position, Player):
         self.grid[position] = Player
 
     # Player 'X' will try to minimize, Player 'O' will try to maximize
     def _miniMax(self, state, Player):
-        self.states_explored += 1
+        self.states_explored += 1 #increment number of states explored
         if state._complete():
             if state._winner() == 'X':
                 return -1
@@ -78,10 +79,10 @@ class Board(object):
         if Player == 'O': #maximizing player
             bestValue = -1
             for slot in state._openSlots():
-                state._takeTurn(slot, Player)
-                _value = self._miniMax(state, _other(Player))
-                state._takeTurn(slot, None)
-                if _value > bestValue:
+                state._takeTurn(slot, Player) #take the move
+                _value = self._miniMax(state, _other(Player)) #analyze the move for the opponent
+                state._takeTurn(slot, None) #reverse the move
+                if _value > bestValue: #update bestValue if _value returned from recursive call is bigger
                     bestValue = _value
             return bestValue
         if Player == 'X': #minimizing player
@@ -90,17 +91,33 @@ class Board(object):
                 state._takeTurn(slot, Player)
                 _value = self._miniMax(state, _other(Player))
                 state._takeTurn(slot, None)
-                if _value < bestValue:
+                if _value < bestValue: #update bestValue
                     bestValue = _value
             return bestValue
 
-# this is the computer AI that will utilize minimax search and determine the next move
-def ComputerMove(state, Player):
+# function that will return the best move for the 'X' player (minimizer)
+def TakeTurnX(state, Player):
+    state.states_explored = 0 #update states explored to be 0 with every new turn.
+    a = 1
+    moves = [] #will hold an array of best moves
+    for slot in state._openSlots(): #will analyze making each available move with minimax
+        state._takeTurn(slot, Player) #make the move
+        _value = state._miniMax(state, _other(Player)) #analyze
+        state._takeTurn(slot, None) #reverse the move
+        if _value < a: #make decision
+            a = _value
+            moves = [slot]
+        elif _value == a:
+            moves.append(slot)
+    print "Explored", state.states_explored, "states."
+    print moves
+    return random.choice(moves)
+
+# Function that will return the best move for the 'O' player
+def TakeTurnO(state, Player):
     state.states_explored = 0
     a = -1
     moves = []
-    if len(state._openSlots()) == 9: #if empty board, just take the middle
-        return 4
     for slot in state._openSlots():
         state._takeTurn(slot, Player)
         _value = state._miniMax(state, _other(Player))
@@ -113,24 +130,8 @@ def ComputerMove(state, Player):
     print "Explored", state.states_explored, "states."
     return random.choice(moves)
 
-def ComputerMove2(state, Player): #Computer will go first as X, and will minimize.
-    state.states_explored = 0
-    a = 1
-    moves = []
-    for slot in state._openSlots():
-        state._takeTurn(slot, Player)
-        _value = state._miniMax(state, _other(Player))
-        state._takeTurn(slot, None)
-        if _value < a:
-            a = _value
-            moves = [slot]
-        elif _value == a:
-            moves.append(slot)
-    print "Explored", state.states_explored, "states."
-    print moves
-    return random.choice(moves)
 
-# initialization and running of the game
+# initialization and running of the game below
 print "Welcome to Tic-Tac-Toe!"
 
 while True:
@@ -154,13 +155,13 @@ while True:
             if board._complete():
                 break
             player = _other(player)
-            computer_move = ComputerMove(board, player)
+            computer_move = TakeTurnO(board, player)
             board._takeTurn(computer_move, player)
             board._print()
             player = _other(player)
     elif player == 'O': #Computer will go first
         while not board._complete():
-            computer_move = ComputerMove2(board, _other(player))
+            computer_move = TakeTurnX(board, _other(player))
             board._takeTurn(computer_move, _other(player))
             board._print()
 
